@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CarouselfigureOOP</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .banner{
+            width: 1000px;
+            height: 400px;
+            margin: 20px auto;
+            position: relative;
+        }
+        .banner .list li{
+            display: none;
+        }
+        .banner .list .active{
+            display: block;
+        }
+        .banner .list a{
+            display: block;
+            height: 400px;
+            background: url(img/0.jpg) no-repeat center 0;
+            transition: 1s;
+        }
+        .banner .btn{
+            position: absolute;
+            left: 50%;
+            margin-left: -250px;
+            bottom: 20px;
+            /*transform: translateX(-50%);*/
+        }
+        .banner .btn li{
+            float: left;
+            width: 30px;
+            font:14px/30px arial;
+            background: #ccc;
+            text-align: center;
+            margin: 0 10px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .banner .btn .active{
+            background: pink;
+            color: #333;
+            font-weight: bold;
+        }
+        .banner .arrow{
+            width: 40px;
+            font:14px/60px "微软雅黑";
+            color: #fff;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            position: absolute;
+            text-decoration: none;
+            top: 50%;
+            margin-top: -30px;
+        }
+        .banner .right{
+            right: 0;
+        }
+        .banner .arrow:hover{
+            background: rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+<div class = "banner">
+</div>
+<div class = "banner">
+
+</div>
+<div class = "banner">
+
+</div>
+<script src="Walker.js"></script>
+<script>
+    //轮播图片数组
+    var imgData = ['img/0.jpg','img/1.jpg','img/2.jpg','img/3.jpg','img/4.jpg','img/5.jpg','img/6.jpg','img/7.jpg','img/8.jpg','img/9.jpg','img/10.jpg',];
+
+    /**
+     * 原生轮播图版本
+     */
+    function SlideCarousel(imgData){
+        //构造函数继承图片轮播基类
+        Walker.LoopImages.call(this,imgData);
+
+        //动态原型模式
+        if(typeof this.createImage != 'function'){
+            this.prototype = new Walker.LoopImages();
+        }
+    }
+    //原生轮播图创建舞台
+    SlideCarousel.prototype.createImage = function () {
+        Walker.createStage(this.imgData,0);
+    }
+    //原生轮播图切换下一张图片
+    SlideCarousel.prototype.changeImage = function () {
+        //1.获取列表中的a
+        var links = document.getElementsByClassName('list')[0].getElementsByTagName('a');
+        //2.遍历链接设置背景图地址
+        for(let i = 0; i<links.length;i++){
+            //3.给每个元素设置背景图
+            links[i].style.backgroundImage = `url(${this.imgData[i]})`;
+        }
+        var lis = document.getElementsByClassName('list')[0].getElementsByTagName('li');
+        var btns = document.getElementsByClassName('btn')[0].getElementsByTagName('li');
+        //遍历按钮添加单机事件
+        for(let i = 0;i<btns.length;i++){
+            Walker.addEvent(btns[i],'click',function () {
+                //点按钮的时候要把当前元素的索引值 与 index索引值同步 更新
+                Walker.carouselCore(btns,lis,index=i);
+            });
+        }
+        //获取左右箭头
+        var arrows = document.getElementsByClassName('arrow');
+        //
+        var index = 0;
+        //给左右按钮绑定点击事件
+        Walker.addEvent(arrows[1],'click',function () {
+            index++;
+            if(index>btns.length-1){
+                index = 0;
+            }
+            Walker.carouselCore(btns,lis,index);
+        });
+        Walker.addEvent(arrows[0],'click',function () {
+            index--;
+            if(index<0){
+                index = btns.length-1;
+            }
+            Walker.carouselCore(btns,lis,index);
+        });
+        /**
+         * 自动播放部分
+         */
+        //一个定时器
+        var timer = setInterval(function () {
+            index++;
+            if(index>btns.length-1){
+                index=0;
+            }
+            Walker.carouselCore(btns,lis,index);
+        },1500);
+        //添加鼠标移入事件
+        var banner = document.getElementsByClassName('banner')[0];
+        Walker.addEvent(banner,'mouseover',function () {
+            //清除定时器
+            clearInterval(timer);
+        });
+        //添加鼠标移出事件
+        Walker.addEvent(banner,'mouseout',function () {
+           //重新添加定时器
+            timer = setInterval(function () {
+                index++;
+                if(index>btns.length-1){
+                    index=0;
+                }
+                Walker.carouselCore(btns,lis,index);
+            },1500);
+        });
+    }
+
+    //创建原生轮播图实例
+    var slideCarousel = new SlideCarousel(imgData);
+
+    //调用createImage创建舞台
+    slideCarousel.createImage();
+
+    //调用changeImage播放图片
+    slideCarousel.changeImage();
+
+
+</script>
+</body>
+</html>
